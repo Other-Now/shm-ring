@@ -71,8 +71,10 @@ jobs:
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
           cmake --build build -j4
       - name: huge-page path
-        run: ./build/shmring_tests 2>&1 | tee tests.txt && grep "huge pages: yes" tests.txt
-      - name: latency / throughput / micro (CI VM numbers: shared, noisy, for smoke only)
+        run: |
+          ./build/shmring_tests 2>&1 | tee tests.txt
+          grep "huge pages: yes" tests.txt
+      - name: "latency / throughput / micro (CI VM numbers: shared, noisy, for smoke only)"
         run: |
           lscpu -e | tee ci-results.txt
           for i in 1 2 3; do
