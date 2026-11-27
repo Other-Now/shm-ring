@@ -65,7 +65,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: reserve 2 MiB huge pages (the local WSL box has none and no root)
-        run: sudo sysctl vm.nr_hugepages=64 && grep -i huge /proc/meminfo
+        run: |
+          sudo sysctl vm.nr_hugepages=64
+          mount | grep -q " /dev/hugepages " || { sudo mkdir -p /dev/hugepages; sudo mount -t hugetlbfs none /dev/hugepages; }
+          sudo chmod 1777 /dev/hugepages     # shm-ring creates its segment files there as a normal user
+          mount | grep huge; ls -ld /dev/hugepages; grep -i huge /proc/meminfo
       - name: build
         run: |
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
