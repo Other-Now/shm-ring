@@ -1,0 +1,4 @@
+build*/
+/results/raw/*.data
+*.data
+perf.data*

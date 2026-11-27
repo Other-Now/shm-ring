@@ -1,0 +1,76 @@
+2026-11-27T06:52:29+00:00
+Running /home/chiku/sr-build/micro
+Run on (4 X 2400.01 MHz CPU s)
+CPU Caches:
+  L1 Data 32 KiB (x2)
+  L1 Instruction 32 KiB (x2)
+  L2 Unified 256 KiB (x2)
+  L3 Unified 8192 KiB (x1)
+Load Average: 1.61, 1.18, 0.56
+------------------------------------------------------------------------------
+Benchmark                                    Time             CPU   Iterations
+------------------------------------------------------------------------------
+spsc_push_pop/packed_mean                 5.93 ns         5.66 ns            5
+spsc_push_pop/packed_median               5.91 ns         5.63 ns            5
+spsc_push_pop/packed_stddev              0.076 ns        0.078 ns            5
+spsc_push_pop/packed_cv                   1.29 %          1.38 %             5
+spsc_push_pop/padded_mean                 5.88 ns         5.65 ns            5
+spsc_push_pop/padded_median               5.86 ns         5.65 ns            5
+spsc_push_pop/padded_stddev              0.096 ns        0.052 ns            5
+spsc_push_pop/padded_cv                   1.63 %          0.92 %             5
+spsc_push_pop/padded_cached_mean          5.67 ns         5.66 ns            5
+spsc_push_pop/padded_cached_median        5.63 ns         5.63 ns            5
+spsc_push_pop/padded_cached_stddev       0.072 ns        0.049 ns            5
+spsc_push_pop/padded_cached_cv            1.26 %          0.87 %             5
+mpsc_push_pop_mean                        10.2 ns         10.2 ns            5
+mpsc_push_pop_median                      10.2 ns         10.2 ns            5
+mpsc_push_pop_stddev                     0.068 ns        0.044 ns            5
+mpsc_push_pop_cv                          0.66 %          0.43 %             5
+spsc_burst64/padded_mean                   211 ns          202 ns            5 items_per_second=316.406M/s
+spsc_burst64/padded_median                 208 ns          200 ns            5 items_per_second=319.922M/s
+spsc_burst64/padded_stddev                4.28 ns         4.11 ns            5 items_per_second=6.33859M/s
+spsc_burst64/padded_cv                    2.03 %          2.03 %             5 items_per_second=2.00%
+spsc_burst64/padded_cached_mean            200 ns          192 ns            5 items_per_second=333.906M/s
+spsc_burst64/padded_cached_median          198 ns          191 ns            5 items_per_second=335.705M/s
+spsc_burst64/padded_cached_stddev         5.21 ns         4.72 ns            5 items_per_second=8.20455M/s
+spsc_burst64/padded_cached_cv             2.61 %          2.46 %             5 items_per_second=2.46%
+mpsc_burst64_mean                          755 ns          751 ns            5 items_per_second=85.263M/s
+mpsc_burst64_median                        758 ns          751 ns            5 items_per_second=85.2651M/s
+mpsc_burst64_stddev                       6.55 ns         5.80 ns            5 items_per_second=659.583k/s
+mpsc_burst64_cv                           0.87 %          0.77 %             5 items_per_second=0.77%
+seqlock_store_mean                        1.36 ns         1.33 ns            5
+seqlock_store_median                      1.37 ns         1.33 ns            5
+seqlock_store_stddev                     0.042 ns        0.021 ns            5
+seqlock_store_cv                          3.11 %          1.55 %             5
+seqlock_load_mean                         4.80 ns         4.57 ns            5
+seqlock_load_median                       4.81 ns         4.58 ns            5
+seqlock_load_stddev                      0.062 ns        0.056 ns            5
+seqlock_load_cv                           1.29 %          1.23 %             5
+pool_acquire_release_mean                 7.54 ns         7.41 ns            5
+pool_acquire_release_median               7.42 ns         7.37 ns            5
+pool_acquire_release_stddev              0.212 ns        0.075 ns            5
+pool_acquire_release_cv                   2.82 %          1.02 %             5
+new_delete_mean                           15.8 ns         15.8 ns            5
+new_delete_median                         15.9 ns         15.9 ns            5
+new_delete_stddev                        0.198 ns        0.230 ns            5
+new_delete_cv                             1.25 %          1.45 %             5
+pool_churn256_mean                        2.31 ns         2.21 ns            5
+pool_churn256_median                      2.30 ns         2.20 ns            5
+pool_churn256_stddev                     0.038 ns        0.036 ns            5
+pool_churn256_cv                          1.65 %          1.65 %             5
+heap_churn256_mean                        16.4 ns         15.8 ns            5
+heap_churn256_median                      16.3 ns         15.6 ns            5
+heap_churn256_stddev                     0.226 ns        0.251 ns            5
+heap_churn256_cv                          1.38 %          1.59 %             5
+abstraction/direct_mean                   3.09 ns         3.09 ns            5
+abstraction/direct_median                 3.10 ns         3.10 ns            5
+abstraction/direct_stddev                0.075 ns        0.075 ns            5
+abstraction/direct_cv                     2.42 %          2.42 %             5
+abstraction/template_concept_mean         3.10 ns         3.10 ns            5
+abstraction/template_concept_median       3.08 ns         3.08 ns            5
+abstraction/template_concept_stddev      0.087 ns        0.087 ns            5
+abstraction/template_concept_cv           2.82 %          2.81 %             5
+abstraction/virtual_mean                  3.36 ns         3.23 ns            5
+abstraction/virtual_median                3.26 ns         3.13 ns            5
+abstraction/virtual_stddev               0.208 ns        0.200 ns            5
+abstraction/virtual_cv                    6.18 %          6.19 %             5

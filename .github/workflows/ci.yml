@@ -1,0 +1,94 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        cxx: [g++, clang++]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=${{ matrix.cxx }} -DSHMRING_NATIVE=OFF
+      - name: build
+        run: cmake --build build -j4
+      - name: test (unit + cross-process + inproc/xproc parity)
+        run: ctest --test-dir build --output-on-failure
+
+  sanitizers:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: lower ASLR entropy (TSan cannot map its shadow with 32 random bits)
+        run: sudo sysctl vm.mmap_rnd_bits=28
+      - name: ThreadSanitizer
+        run: |
+          cmake -S . -B tsan -DCMAKE_BUILD_TYPE=RelWithDebInfo -DSHMRING_BENCH=OFF -DSHMRING_NATIVE=OFF \
+                -DCMAKE_CXX_FLAGS="-fsanitize=thread -O1 -g"
+          cmake --build tsan -j4
+          TSAN_OPTIONS=halt_on_error=1 ctest --test-dir tsan --output-on-failure
+      - name: TSan negative control (must report a race)
+        run: |
+          g++ -std=c++20 -O1 -g -fsanitize=thread tests/tsan_canary.cpp -o canary
+          if ./canary 2> canary.log; then echo "TSan missed the planted race"; exit 1; fi
+          grep -q "WARNING: ThreadSanitizer: data race" canary.log && echo "planted race detected, as it must be"
+      - name: AddressSanitizer + UBSan
+        run: |
+          cmake -S . -B asan -DCMAKE_BUILD_TYPE=RelWithDebInfo -DSHMRING_BENCH=OFF -DSHMRING_NATIVE=OFF \
+                -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all"
+          cmake --build asan -j4
+          ctest --test-dir asan --output-on-failure
+
+  valgrind:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y valgrind
+      - name: build
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DSHMRING_BENCH=OFF -DSHMRING_NATIVE=OFF
+          cmake --build build -j4
+      - name: steady-state allocations (before = original risk gate, after = pmr gate)
+        run: |
+          bash tools/valgrind_steady_state.sh build/t2t_split_heapgate data/sample.NASDAQ_ITCH50 60000 120000 vg-before | tee before.txt
+          bash tools/valgrind_steady_state.sh build/t2t_split data/sample.NASDAQ_ITCH50 60000 120000 vg-after | tee after.txt
+          grep -E "strategy .*delta +0 +memcheck errors 0 / 0" after.txt
+          grep -E "feed .*memcheck errors 0 / 0" after.txt
+
+  bench-smoke:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: reserve 2 MiB huge pages (the local WSL box has none and no root)
+        run: sudo sysctl vm.nr_hugepages=64 && grep -i huge /proc/meminfo
+      - name: build
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build -j4
+      - name: huge-page path
+        run: ./build/shmring_tests 2>&1 | tee tests.txt && grep "huge pages: yes" tests.txt
+      - name: latency / throughput / micro (CI VM numbers: shared, noisy, for smoke only)
+        run: |
+          lscpu -e | tee ci-results.txt
+          for i in 1 2 3; do
+            ./build/ipc_latency --transport shm --cpus 1,3 --iters 500000 2>> ci-results.txt
+            ./build/ipc_latency --transport shm --huge --cpus 1,3 --iters 500000 2>> ci-results.txt
+          done
+          for t in pipe uds eventfd; do
+            ./build/ipc_latency --transport $t --cpus 1,3 --iters 50000 --warmup 5000 2>> ci-results.txt
+            ./build/ipc_latency --transport $t --spin --cpus 1,3 --iters 100000 --warmup 10000 2>> ci-results.txt
+          done
+          for l in packed padded packed-cached cached; do ./build/ring_throughput --layout $l --msgs 10000000 2>> ci-results.txt; done
+          ./build/hiccup --cpu 3 --secs 5 2>> ci-results.txt
+          ./build/t2t_split run data/sample.NASDAQ_ITCH50 --gap-ns 2000 --warmup 20000 2>> ci-results.txt
+          ./build/micro --benchmark_min_time=0.1s 2>&1 | tee -a ci-results.txt
+          cat ci-results.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ci-results
+          path: ci-results.txt

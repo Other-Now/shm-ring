@@ -1,0 +1,10 @@
+[feed] messages 3000000  book events 2779724  unknown refs 0  steady-state operator-new calls: 3
+[xproc] updates 2779724  signals 12869  accepted 12860  rejected 9  pool_empty 0
+[xproc] ns (TSC)                          p50       p99     p99.9
+[xproc] tick-to-order                     588      5231     85480   (n=12860)
+[xproc]   feed: decode+book+snap          127       478       845   (n=12860)
+[xproc]   ring hop                        107      3816     85066   (n=12860)
+[xproc]   strategy+risk+encode            302      1802      4272   (n=12860)
+[xproc] ring transit, all updates         113      5321    125681   (n=2779724)
+[xproc] OUCH checksum f3d41b9b70342962   steady-state operator-new calls (strategy side): 2
+[xproc]   reject BAD_ORDER          9

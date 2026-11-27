@@ -1,0 +1,20 @@
+== operator-new counter, 3M messages, 200k warm-up
+-- t2t_split_heapgate --no-reserve
+[feed] messages 3000000  book events 2779724  unknown refs 0  steady-state operator-new calls: 4389
+[xproc] OUCH checksum 5e6615dd2a6b7a79   steady-state operator-new calls (strategy side): 25716
+-- t2t_split_heapgate 
+[feed] messages 3000000  book events 2779724  unknown refs 0  steady-state operator-new calls: 3
+[xproc] OUCH checksum 5e6615dd2a6b7a79   steady-state operator-new calls (strategy side): 25716
+-- t2t_split --no-reserve
+[feed] messages 3000000  book events 2779724  unknown refs 0  steady-state operator-new calls: 4389
+[xproc] OUCH checksum 5e6615dd2a6b7a79   steady-state operator-new calls (strategy side): 2
+-- t2t_split 
+[feed] messages 3000000  book events 2779724  unknown refs 0  steady-state operator-new calls: 3
+[xproc] OUCH checksum de4bcb7d9aadbaad   steady-state operator-new calls (strategy side): 2
+== valgrind memcheck, delta between 1M and 2M messages
+binary: t2t_split_heapgate   messages 1000000 -> 2000000
+  feed      allocs      32786 ->      32788   delta      2   memcheck errors 0 / 0
+  strategy  allocs       7007 ->      16941   delta   9934   memcheck errors 0 / 0
+binary: t2t_split   messages 1000000 -> 2000000
+  feed      allocs      32786 ->      32788   delta      2   memcheck errors 0 / 0
+  strategy  allocs         22 ->         22   delta      0   memcheck errors 0 / 0
