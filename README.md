@@ -134,6 +134,20 @@ into the caller.
 - Huge pages: CI reserves 64 × 2 MiB pages and checks that `/proc/self/smaps` reports
   `KernelPageSize: 2048 kB` for the ring. The laptop has none reserved and no root.
 
+### 7. Second machine: the GitHub Actions VM (smoke run, single runs, noisy)
+
+The `bench-smoke` CI job reproduces the **shape** of the results on a different host (4-vCPU
+Azure VM, pinned to vCPUs 1 and 3):
+
+- **False-sharing 2×2**: packed 163, padded 195, packed+cached 144, **padded+cached 410** M msg/s.
+  Same ordering, and the cached-but-packed layout is again the worst.
+- **Wake-ups**: blocking pipe/UDS/eventfd take 1.5–3.5 µs there vs ~27 µs under WSL2, which
+  confirms the WSL2 wake-up inflation noted above. Busy-poll eventfd/pipe take ~0.3 µs.
+- **shm**: ~28 ns one-way (4 KiB pages) and ~23 ns (2 MiB pages, 3 runs each). That is too fast
+  for a cross-core transfer, so those vCPUs are probably hyperthreads of one core. Don't read the
+  5 ns as a huge-page effect.
+- **Jitter**: ~1,900 gaps/s there too, but max 176 µs vs 10–14 ms under WSL2.
+
 ## What's in it
 
 | | file | notes |
